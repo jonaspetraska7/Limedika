@@ -1,6 +1,7 @@
 using Common.Data;
 using Common.Entities;
-using LimedikaMVC.Data;
+using Common.Interfaces;
+using Common.Services;
 using LinqToDB;
 using LinqToDB.AspNet;
 using LinqToDB.AspNet.Logging;
@@ -16,7 +17,17 @@ builder.Services.AddLinqToDBContext<LimedikaDataConnection>((provider, options) 
     .UseSqlServer(builder.Configuration.GetConnectionString("LimedikaDb"))
     .UseDefaultLogging(provider);
 });
-builder.Services.AddDbContext<LimedikaDataContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("LimedikaDb")));
+
+builder.Services.AddHttpClient<IPostCodeService, PostItService>(httpClient =>
+{
+    httpClient.BaseAddress = new Uri(builder.Configuration.GetValue<string>("PostItUrl"));
+    httpClient.DefaultRequestHeaders.Add("Authorization", builder.Configuration.GetValue<string>("PostItKey"));
+});
+
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<IClientPageService, ClientPageService>();
+builder.Services.AddTransient<IBufferedFileUploadService, BufferedFileUploadService>();
 
 var app = builder.Build();
 

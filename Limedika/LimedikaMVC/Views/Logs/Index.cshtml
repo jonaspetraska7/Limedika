@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Common.Entities.Log>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Veiksmų istorija</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TimeStamp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UserAction)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TimeStamp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserAction)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -1,35 +1,46 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Common.Entities;
-using Common.Data;
-using LinqToDB;
+using Common.Interfaces;
 
 namespace LimedikaMVC.Controllers
 {
     public class ClientsController : Controller
     {
-        private readonly LimedikaDataConnection _connection;
+        private readonly IClientService _clientService;
+        private readonly IClientPageService _clientPageService;
+        private readonly IBufferedFileUploadService _bufferedFileUploadService;
 
-        public ClientsController(LimedikaDataConnection connection)
+        public ClientsController(IClientService clientService, 
+            IClientPageService clientPageService, 
+            IBufferedFileUploadService bufferedFileUploadService)
         {
-            _connection = connection;
+            _clientService = clientService;
+            _clientPageService = clientPageService;
+            _bufferedFileUploadService = bufferedFileUploadService;
         }
 
         // GET: Clients
         public async Task<IActionResult> Index()
         {
-              return View(await _connection.Clients.ToListAsync());
+            try
+            {
+                return View((await _clientService.GetClients()).OrderBy(x => Convert.ToInt32(x.Name.Split(". ")[2])));
+            }
+            catch (Exception)
+            {
+                return View(await _clientService.GetClients());
+            } 
         }
 
         // GET: Clients/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
-            if (id == null || _connection.Clients == null)
+            if (id == null || await _clientService.GetClients() == null)
             {
                 return NotFound();
             }
 
-            var client = await _connection.Clients
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var client = await _clientService.GetClient(id);
             if (client == null)
             {
                 return NotFound();
@@ -54,7 +65,7 @@ namespace LimedikaMVC.Controllers
             if (ModelState.IsValid)
             {
                 client.Id = Guid.NewGuid();
-                await _connection.InsertAsync(client);
+                await _clientService.InsertClient(client);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
@@ -63,12 +74,12 @@ namespace LimedikaMVC.Controllers
         // GET: Clients/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null || _connection.Clients == null)
+            if (id == null || await _clientService.GetClients() == null)
             {
                 return NotFound();
             }
 
-            var client = await _connection.Clients.SingleOrDefaultAsync(client => client.Id == id);
+            var client = await _clientService.GetClient(id);
             if (client == null)
             {
                 return NotFound();
@@ -92,11 +103,11 @@ namespace LimedikaMVC.Controllers
             {
                 try
                 {
-                    await _connection.UpdateAsync(client);
+                    await _clientService.UpdateClient(client);
                 }
                 catch (Exception)
                 {
-                    if (!ClientExists(client.Id))
+                    if (! await ClientExistsAsync(client.Id))
                     {
                         return NotFound();
                     }
@@ -113,13 +124,12 @@ namespace LimedikaMVC.Controllers
         // GET: Clients/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == null || _connection.Clients == null)
+            if (id == null || await _clientService.GetClients() == null)
             {
                 return NotFound();
             }
 
-            var client = await _connection.Clients
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var client = await _clientService.GetClient(id);
             if (client == null)
             {
                 return NotFound();
@@ -133,18 +143,50 @@ namespace LimedikaMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            if (_connection.Clients == null)
+            if (await _clientService.GetClients() == null)
             {
-                return Problem("Entity set 'LimedikaDataContext.Clients'  is null.");
+                return Problem("Entity set 'LimedikaDataConnection.Clients'  is null.");
             }
-            await _connection.Clients.Where(client => client.Id == id).DeleteAsync();
+            await _clientService.DeleteClient(id);
 
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ClientExists(Guid id)
+        [HttpPost]
+        public async Task<ActionResult> Index(IFormFile file)
         {
-          return _connection.Clients.Any(e => e.Id == id);
+            try
+            {
+                var clients = await _bufferedFileUploadService.UploadFile(file);
+
+                if (clients != null)
+                {
+                    await _clientPageService.ImportClients(clients);
+                    ViewBag.Message = "File Upload Successful";
+                }
+                else
+                {
+                    ViewBag.Message = "File Upload Failed";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = $"File Upload Failed : {ex.Message}";
+            }
+
+            return View(await _clientService.GetClients());
+        }
+
+        public async Task<IActionResult> UpdatePostCodes()
+        {
+            await _clientPageService.UpdatePostCodes();
+            return View();
+        }
+
+        private async Task<bool> ClientExistsAsync(Guid id)
+        {
+            var clients = await _clientService.GetClients();
+            return clients.Any(e => e.Id == id);
         }
     }
 }
