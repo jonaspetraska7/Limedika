@@ -44,7 +44,7 @@ namespace Common.Services
 
             var filteredClients = newClients.Except(existingClients, new ClientComparer()).ToList();
 
-            foreach (var client in newClients)
+            foreach (var client in filteredClients)
             {
                 await _logService.InsertLog(new Log()
                 {

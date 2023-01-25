@@ -9,10 +9,17 @@ namespace Common.Services
     {
         public async Task<List<Client>?> UploadFile(IFormFile file)
         {
-            using Stream stream = file.OpenReadStream();
-            List<Client>? clients = await JsonSerializer.DeserializeAsync<List<Client>>(stream);
+            if(file != null)
+            {
+                using Stream stream = file.OpenReadStream();
+                List<Client>? clients = await JsonSerializer.DeserializeAsync<List<Client>>(stream);
 
-            return clients;
+                return clients;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

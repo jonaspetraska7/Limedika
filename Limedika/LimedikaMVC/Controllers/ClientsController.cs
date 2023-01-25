@@ -22,14 +22,7 @@ namespace LimedikaMVC.Controllers
         // GET: Clients
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                return View((await _clientService.GetClients()).OrderBy(x => Convert.ToInt32(x.Name.Split(". ")[2])));
-            }
-            catch (Exception)
-            {
-                return View(await _clientService.GetClients());
-            } 
+            return View(await _clientService.GetClients());
         }
 
         // GET: Clients/Details/5
@@ -180,7 +173,7 @@ namespace LimedikaMVC.Controllers
         public async Task<IActionResult> UpdatePostCodes()
         {
             await _clientPageService.UpdatePostCodes();
-            return View();
+            return RedirectToAction(nameof(Index));
         }
 
         private async Task<bool> ClientExistsAsync(Guid id)

@@ -1,4 +1,5 @@
 ﻿using Common.Interfaces;
+using Newtonsoft.Json.Linq;
 
 namespace Common.Services
 {
@@ -11,10 +12,16 @@ namespace Common.Services
         }
         public async Task<string> GetPostCode(string address)
         {
-            var response = await Client.GetAsync(address);
+            var response = await Client.GetAsync(Client.BaseAddress + address);
             var json = await response.Content.ReadAsStringAsync();
+            var result = JObject.Parse(json)["data"];
 
-            return json;
+            if(result != null)
+            {
+                return result?.First?["post_code"]?.ToString() ?? "NotFound";
+            }
+
+            return "NotFound";
         }
     }
 }

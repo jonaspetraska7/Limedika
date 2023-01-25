@@ -20,8 +20,9 @@ builder.Services.AddLinqToDBContext<LimedikaDataConnection>((provider, options) 
 
 builder.Services.AddHttpClient<IPostCodeService, PostItService>(httpClient =>
 {
-    httpClient.BaseAddress = new Uri(builder.Configuration.GetValue<string>("PostItUrl"));
-    httpClient.DefaultRequestHeaders.Add("Authorization", builder.Configuration.GetValue<string>("PostItKey"));
+    var baseUrl = builder.Configuration.GetValue<string>("PostItUrl");
+    var key = builder.Configuration.GetValue<string>("PostItKey");
+    httpClient.BaseAddress = new Uri($"{baseUrl}?key={key}&term=");
 });
 
 builder.Services.AddScoped<IClientService, ClientService>();
