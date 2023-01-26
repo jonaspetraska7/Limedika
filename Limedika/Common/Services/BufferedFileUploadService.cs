@@ -12,14 +12,19 @@ namespace Common.Services
             if(file != null)
             {
                 using Stream stream = file.OpenReadStream();
-                List<Client>? clients = await JsonSerializer.DeserializeAsync<List<Client>>(stream);
-
-                return clients;
+                return await UploadFile(stream);
             }
             else
             {
                 return null;
             }
+        }
+
+        public async Task<List<Client>?> UploadFile(Stream stream)
+        {
+            List<Client>? clients = await JsonSerializer.DeserializeAsync<List<Client>>(stream);
+
+            return clients;
         }
     }
 }
