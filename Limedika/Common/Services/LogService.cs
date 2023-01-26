@@ -2,6 +2,7 @@
 using Common.Entities;
 using Common.Interfaces;
 using LinqToDB;
+using LinqToDB.Data;
 
 namespace Common.Services
 {
@@ -21,6 +22,11 @@ namespace Common.Services
         public Task<int> InsertLog(Log log)
         {
             return _connection.InsertAsync(log);
+        }
+
+        public Task<BulkCopyRowsCopied> BulkInsertLogs(List<Log> logs)
+        {
+            return _connection.Logs.BulkCopyAsync(new BulkCopyOptions() { TableOptions = TableOptions.CreateIfNotExists }, logs);
         }
     }
 }

@@ -19,7 +19,9 @@ namespace Common.Services
 
         public async Task<int> UpdatePostCodes()
         {
+            var logs = new List<Log>();
             var clients = await _clientService.GetClients();
+
             foreach (var client in clients)
             {
                 var oldCode = client.PostCode;
@@ -27,7 +29,7 @@ namespace Common.Services
 
                 client.PostCode = newCode;
 
-                await _logService.InsertLog(new Log() 
+                logs.Add(new Log() 
                 { 
                     Id = Guid.NewGuid(), 
                     TimeStamp = DateTime.Now, 
@@ -35,24 +37,28 @@ namespace Common.Services
                 });
             }
 
+            await _logService.BulkInsertLogs(logs);
+
             return await _clientService.BulkUpdateClientsPostCodes(clients);
         }
 
         public async Task<BulkCopyRowsCopied> ImportClients(List<Client> newClients)
         {
+            var logs = new List<Log>();
             var existingClients = await _clientService.GetClients();
-
             var filteredClients = newClients.Except(existingClients, new ClientComparer()).ToList();
 
             foreach (var client in filteredClients)
             {
-                await _logService.InsertLog(new Log()
+                logs.Add(new Log()
                 {
                     Id = Guid.NewGuid(),
                     TimeStamp = DateTime.Now,
                     UserAction = $"Client added {client.Id}"
                 });
             }
+
+            await _logService.BulkInsertLogs(logs);
 
             return await _clientService.BulkInsertClients(filteredClients);
         }

@@ -52,6 +52,7 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "Json files (*.json)|*.json|Text files (*.txt)|*.txt\"";
             // 
             // button2
             // 

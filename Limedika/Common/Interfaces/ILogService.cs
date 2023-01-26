@@ -1,4 +1,5 @@
 ﻿using Common.Entities;
+using LinqToDB.Data;
 
 namespace Common.Interfaces
 {
@@ -15,5 +16,11 @@ namespace Common.Interfaces
         /// <param name="log">A log object to insert</param>
         /// <returns>A status</returns>
         Task<int> InsertLog(Log log);
+        /// <summary>
+        /// Method for bulk inserting logs to the database
+        /// </summary>
+        /// <param name="logs">A list of logs</param>
+        /// <returns>Info about the rows copied</returns>
+        Task<BulkCopyRowsCopied> BulkInsertLogs(List<Log> logs);
     }
 }
