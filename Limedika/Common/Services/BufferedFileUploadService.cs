@@ -22,9 +22,15 @@ namespace Common.Services
 
         public async Task<List<Client>?> UploadFile(Stream stream)
         {
-            List<Client>? clients = await JsonSerializer.DeserializeAsync<List<Client>>(stream);
-
-            return clients;
+            try
+            {
+                List<Client>? clients = await JsonSerializer.DeserializeAsync<List<Client>>(stream);
+                return clients;
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
         }
     }
 }
