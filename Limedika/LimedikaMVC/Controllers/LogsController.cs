@@ -2,6 +2,7 @@
 using Common.Entities;
 using LinqToDB;
 using Common.Interfaces;
+using X.PagedList;
 
 namespace LimedikaMVC.Controllers
 {
@@ -15,10 +16,21 @@ namespace LimedikaMVC.Controllers
         }
 
         // GET: Logs
-        public async Task<IActionResult> Index(string sortOrder, string searchString)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
             ViewBag.TimeStampSortParm = string.IsNullOrEmpty(sortOrder) ? "time_desc" : "";
             ViewBag.UserActionSortParm = sortOrder == "action" ? "action_desc" : "action";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchString;
 
             var logs = (await _logService.GetLogs()).AsQueryable();
 
@@ -43,7 +55,10 @@ namespace LimedikaMVC.Controllers
                     break;
             }
 
-            return View(logs.ToList());
+            int pageSize = 10;
+            int pageNumber = (page ?? 1);
+
+            return View(logs.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: Logs/Create

@@ -1,4 +1,7 @@
-﻿@model IEnumerable<Common.Entities.Log>
+﻿@model X.PagedList.IPagedList<Common.Entities.Log>
+@using X.PagedList;
+@using X.PagedList.Mvc.Bootstrap4.Core
+@using X.PagedList.Mvc.Core
 
 @{
     ViewData["Title"] = "Index";
@@ -6,10 +9,10 @@
 
 <h1>Veiksmų istorija</h1>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("Index"))
 {
     <p>
-        Surasti pagal laiką: @Html.TextBox("SearchString")  
+        Surasti pagal laiką: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)  
         <input type="submit" value="Search" /></p>
 }
 
@@ -17,10 +20,10 @@
     <thead>
         <tr>
             <th>
-                @Html.ActionLink("Laiko žyma", "Index", new { sortOrder = ViewBag.TimeStampSortParm })
+                @Html.ActionLink("Laiko žyma", "Index", new { sortOrder = ViewBag.TimeStampSortParm, currentFilter = ViewBag.CurrentFilter })
             </th>
             <th>
-                @Html.ActionLink("Veiksmas", "Index", new { sortOrder = ViewBag.UserActionSortParm })
+                @Html.ActionLink("Veiksmas", "Index", new { sortOrder = ViewBag.UserActionSortParm, currentFilter = ViewBag.CurrentFilter })
             </th>
         </tr>
     </thead>
@@ -37,3 +40,7 @@
 }
     </tbody>
 </table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page }), Bootstrap4PagedListRenderOptions.ClassicPlusFirstAndLast)
