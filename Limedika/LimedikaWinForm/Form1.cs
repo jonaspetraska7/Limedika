@@ -82,6 +82,7 @@ namespace LimedikaWinForm
         {
             textBox1.Clear();
             var logs = await _logService.GetLogs();
+            logs = logs.OrderBy(x => x.TimeStamp).ToList();
             textBox1.AppendText(string.Format("{0,-40}|{1,-40}\r\n",
                               "Laiko žyma", "Vartotojo veiksmas"));
             foreach (var log in logs)
