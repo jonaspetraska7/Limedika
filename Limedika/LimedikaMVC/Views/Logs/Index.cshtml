@@ -6,16 +6,22 @@
 
 <h1>Veiksmų istorija</h1>
 
+@using (Html.BeginForm())
+{
+    <p>
+        Surasti pagal laiką: @Html.TextBox("SearchString")  
+        <input type="submit" value="Search" /></p>
+}
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.TimeStamp)
+                @Html.ActionLink("Laiko žyma", "Index", new { sortOrder = ViewBag.TimeStampSortParm })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UserAction)
+                @Html.ActionLink("Veiksmas", "Index", new { sortOrder = ViewBag.UserActionSortParm })
             </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>

@@ -15,9 +15,35 @@ namespace LimedikaMVC.Controllers
         }
 
         // GET: Logs
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-              return View((await _logService.GetLogs()).OrderBy(x => x.TimeStamp));
+            ViewBag.TimeStampSortParm = string.IsNullOrEmpty(sortOrder) ? "time_desc" : "";
+            ViewBag.UserActionSortParm = sortOrder == "action" ? "action_desc" : "action";
+
+            var logs = (await _logService.GetLogs()).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                logs = logs.Where(s => s.TimeStamp.ToString().Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "time_desc":
+                    logs = logs.OrderByDescending(s => s.TimeStamp);
+                    break;
+                case "action":
+                    logs = logs.OrderBy(s => s.UserAction);
+                    break;
+                case "action_desc":
+                    logs = logs.OrderByDescending(s => s.UserAction);
+                    break;
+                default:
+                    logs = logs.OrderBy(s => s.TimeStamp);
+                    break;
+            }
+
+            return View(logs.ToList());
         }
 
         // GET: Logs/Create
