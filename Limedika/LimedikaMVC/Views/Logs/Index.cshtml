@@ -8,12 +8,13 @@
 }
 
 <h1>Veiksmų istorija</h1>
+<br />
 
 @using (Html.BeginForm("Index"))
 {
     <p>
-        Surasti pagal laiką: @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)  
-        <input type="submit" value="Search" /></p>
+        @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)  
+        <input type="submit" value="Paieška" /></p>
 }
 
 <table class="table">

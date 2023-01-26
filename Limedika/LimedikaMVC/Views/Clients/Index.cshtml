@@ -1,37 +1,48 @@
-﻿@model IEnumerable<Common.Entities.Client>
+﻿@model X.PagedList.IPagedList<Common.Entities.Client>
+@using X.PagedList;
+@using X.PagedList.Mvc.Bootstrap4.Core
+@using X.PagedList.Mvc.Core
 
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>Klientų sąrašas</h1>
+<br />
+
+@using (Html.BeginForm("Index"))
+{
+    <p>
+        @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)  
+        <input type="submit" value="Paieška" /></p>
+}
 
 <div>
-    <form asp-action="Index" enctype="multipart/form-data" method="POST">
+    <form asp-action="Upload" enctype="multipart/form-data" method="POST">
         <input type="file" name="file" accept=".json"/> 
-        <button type="submit" class="btn btn-link">Importuoti klientus</button>
+        <input type="submit" value="Importuoti klientus"></>
     </form>
 </div>
+<br />
 <p>
     <a asp-action="UpdatePostCodes">Atnaujinti pašto indeksus</a>
 </p>
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Sukurti naują</a>
 </p>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.ActionLink("Pavadinimas", "Index", new { sortOrder = ViewBag.NameSortParm, currentFilter = ViewBag.CurrentFilter })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
+                @Html.ActionLink("Adresas", "Index", new { sortOrder = ViewBag.AddressSortParm, currentFilter = ViewBag.CurrentFilter })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PostCode)
+                @Html.ActionLink("Pašto kodas", "Index", new { sortOrder = ViewBag.PostCodeSortParm, currentFilter = ViewBag.CurrentFilter })
             </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -55,3 +66,6 @@
 }
     </tbody>
 </table>
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager((IPagedList)Model, page => Url.Action("Index", new { page }), Bootstrap4PagedListRenderOptions.ClassicPlusFirstAndLast)

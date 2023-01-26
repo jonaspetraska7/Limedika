@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Common.Entities;
 using Common.Interfaces;
+using X.PagedList;
 
 namespace LimedikaMVC.Controllers
 {
@@ -20,9 +21,58 @@ namespace LimedikaMVC.Controllers
         }
 
         // GET: Clients
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            return View(await _clientService.GetClients());
+            ViewBag.AddressSortParm = string.IsNullOrEmpty(sortOrder) ? "address_desc" : "";
+            ViewBag.NameSortParm = sortOrder == "name" ? "name_desc" : "name";
+            ViewBag.PostCodeSortParm = sortOrder == "postcode" ? "poscode_dec" : "postcode";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchString;
+
+            var logs = (await _clientService.GetClients()).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                logs = logs.Where(s => s.Address.Contains(searchString) || 
+                    s.Name.Contains(searchString) || 
+                    s.PostCode.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "address_desc":
+                    logs = logs.OrderByDescending(s => s.Address);
+                    break;
+                case "name":
+                    logs = logs.OrderBy(s => s.Name);
+                    break;
+                case "name_desc":
+                    logs = logs.OrderByDescending(s => s.Name);
+                    break;
+                case "postcode":
+                    logs = logs.OrderBy(s => s.PostCode);
+                    break;
+                case "postcode_desc":
+                    logs = logs.OrderByDescending(s => s.PostCode);
+                    break;
+                default:
+                    logs = logs.OrderBy(s => s.Address);
+                    break;
+            }
+
+            int pageSize = 10;
+            int pageNumber = (page ?? 1);
+
+            return View(logs.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: Clients/Details/5
@@ -146,7 +196,7 @@ namespace LimedikaMVC.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Index(IFormFile file)
+        public async Task<ActionResult> Upload(IFormFile file)
         {
             try
             {
@@ -167,7 +217,7 @@ namespace LimedikaMVC.Controllers
                 ViewBag.Message = $"File Upload Failed : {ex.Message}";
             }
 
-            return View(await _clientService.GetClients());
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> UpdatePostCodes()

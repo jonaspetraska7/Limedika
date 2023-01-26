@@ -36,7 +36,7 @@ namespace LimedikaMVC.Controllers
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                logs = logs.Where(s => s.TimeStamp.ToString().Contains(searchString));
+                logs = logs.Where(s => s.TimeStamp.ToString().Contains(searchString) || s.UserAction.Contains(searchString));
             }
 
             switch (sortOrder)
